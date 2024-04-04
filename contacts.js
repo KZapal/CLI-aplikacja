@@ -11,33 +11,6 @@ async function writeFile(data) {
   return fs.writeFile(contactsPath, data, "utf-8");
 }
 
-async function getAllContacts() {
-  try {
-    const contactsData = await readFile();
-    return JSON.parse(contactsData.toString());
-  } catch (error) {
-    throw new Error("Error getting all contacts");
-  }
-}
-
-async function addContact(newContact) {
-  try {
-    const contacts = await getAllContacts();
-    newContact.id = generateUniqueId();
-    contacts.push(newContact);
-    await writeFile(JSON.stringify(contacts, null, 2));
-    return newContact;
-  } catch (error) {
-    throw new Error("Error adding contact");
-  }
-}
-
-const { v4: uuidv4 } = require("uuid");
-
-function generateUniqueId() {
-  return uuidv4().replace(/-/g, "").substr(0, 21);
-}
-
 async function listContacts() {
   try {
     const contactsData = await readFile();
@@ -60,7 +33,7 @@ async function getContactById(contactId) {
 }
 async function removeContact(contactId) {
   try {
-    const contacts = await getAllContacts();
+    const contacts = await listContacts();
     const updatedContacts = contacts.filter(
       (contact) => contact.id !== contactId
     );
@@ -73,7 +46,7 @@ async function removeContact(contactId) {
 
 async function addContact(name, email, phone) {
   try {
-    const contacts = await getAllContacts();
+    const contacts = await listContacts();
     const isNameDuplicate = contacts.some((contact) => contact.name === name);
     if (isNameDuplicate) {
       throw new Error(`Contact with the name '${name}' already exists.`);
@@ -104,7 +77,6 @@ async function addContact(name, email, phone) {
 module.exports = {
   readFile,
   writeFile,
-  getAllContacts,
   addContact,
   listContacts,
   getContactById,
